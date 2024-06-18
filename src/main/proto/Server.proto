@@ -1,0 +1,40 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "org.example";
+
+service Server{
+    rpc registrazione(RegistrazioneRequest) returns (RegistrazioneResponse);
+    rpc prenotazioneAppello(PrenotazioneRequest) returns (PrenotazioneResponse);
+    rpc notificami(NotificaRequest) returns (stream NotificaResponse);
+}
+
+message NotificaRequest{}
+
+message NotificaResponse{
+  string nomeEsame = 1;
+  string data = 2;
+  string oraInizio = 3;
+  string oraFine = 4;
+}
+
+message RegistrazioneRequest{
+  string matricola = 1;
+  string CF = 2;
+};
+
+message RegistrazioneResponse{
+  bool registrato = 1;
+};
+
+message PrenotazioneRequest{
+  string matricola = 1;
+  string CF = 2;
+  string appello = 3;
+}
+
+message PrenotazioneResponse{
+  string domandeAppello = 1;
+  string risposteAppello = 2;
+  bool prenotato = 3;
+}
