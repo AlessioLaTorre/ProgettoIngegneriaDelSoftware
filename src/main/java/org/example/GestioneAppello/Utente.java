@@ -1,4 +1,4 @@
-package org.example;
+package org.example.GestioneAppello;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
