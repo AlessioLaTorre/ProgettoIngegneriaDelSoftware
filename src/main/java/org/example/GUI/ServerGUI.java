@@ -1,4 +1,8 @@
-package org.example;
+package org.example.GUI;
+
+import org.example.GestioneAppello.Appello;
+import org.example.GestioneAppello.Domanda;
+import org.example.Server;
 
 import javax.swing.*;
 import java.awt.*;
@@ -124,22 +128,19 @@ public class ServerGUI extends JFrame {
                     appelliListModel.addElement(txtNomeEsame.getText());
 
                     aggiunta = false;
-
-                    ArrayList<String> domandeAppello = new ArrayList<>();
-                    ArrayList<String> risposteAppello = new ArrayList<>();
-                    for(Domanda d : doma)
-                    {   domandeAppello.add(d.getTesto());
-                        risposteAppello.add(d.getRisposteInFormato());
-                    }
-                    doma.clear();
                     String nomeEsame = txtNomeEsame.getText();
                     int numeroCrediti = (Integer) spnNumeroCrediti.getValue();
                     String data = txtData.getText();
                     String oraInizio = txtOraInizio.getText();
                     String oraFine = calcolaFineOra(oraInizio);
-                    Appello appello = new Appello(nomeEsame,data,oraInizio,oraFine);
-                    appello.setMappaDomande(domandeAppello, risposteAppello);
-                    //appelliManager.addAppello(appello);
+                    Appello.Builder builder = Appello.newBuilder();
+                    Appello appello = builder.withNomeEsame(nomeEsame)
+                                             .withData(data)
+                                             .withOraInizio(oraInizio)
+                                             .withOraFine(oraFine)
+                                             .withDomande(new ArrayList<>(doma))
+                                             .build();
+                    doma.clear();
                     server.aggiungiAppello(appello);
                     dialog.dispose();
                 }
@@ -234,6 +235,7 @@ public class ServerGUI extends JFrame {
 
     class AggiungiDomandeDialog extends JDialog
     {
+        private static final int numDomande = 2;
         private List<Domanda> domande = new ArrayList<>();
         private JPanel domandePanel;
         private boolean aggiunte = false;
@@ -253,7 +255,7 @@ public class ServerGUI extends JFrame {
             add(scrollPane, BorderLayout.CENTER);
 
 
-            for (int i = 1; i <= 10; i++)
+            for (int i = 1; i <= numDomande; i++)
             {
                 aggiungiDomandaPanel(i);
             }
@@ -350,7 +352,7 @@ public class ServerGUI extends JFrame {
                     domande.add(new Domanda(testoDomanda, rispostaCorretta,risposteSbagliate));
                 }
             }
-            return domande.size() == 10;
+            return domande.size() == numDomande;
         }
 
         public List<Domanda> getDomande()
@@ -362,36 +364,5 @@ public class ServerGUI extends JFrame {
         }
 
     }
-    class Domanda {
-        private final String testo;
-        private final String rispostaCorretta;
-        private final ArrayList<String> risposteSbagliate;
 
-
-        public Domanda(String testo, String rispostaCorretta, ArrayList<String> risposteSbagliate) {
-            this.testo = testo;
-            this.rispostaCorretta = rispostaCorretta;
-            this.risposteSbagliate = risposteSbagliate;
-        }
-
-        public String getTesto() {
-            return testo;
-        }
-
-        public String getRisposteInFormato()
-        {   StringBuilder formato = new StringBuilder(rispostaCorretta);
-
-            for(String sbagliata: risposteSbagliate)
-                formato.append("-").append(sbagliata);
-            return formato.toString();
-        }
-
-        public String getRispostaCorretta() {
-            return rispostaCorretta;
-        }
-
-        public ArrayList<String> getRisposteSbagliate() {
-            return risposteSbagliate;
-        }
-    }
 }

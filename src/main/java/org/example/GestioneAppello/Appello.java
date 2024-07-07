@@ -1,4 +1,4 @@
-package GestioneAppello;
+package org.example.GestioneAppello;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -84,7 +84,7 @@ public class Appello
         private LocalDate data;
         private LocalTime oraInizio;
         private LocalTime oraFine;
-        private List<Domanda> domande;
+        private ArrayList<Domanda> domande;
 
         private Builder() {}
 
@@ -125,7 +125,7 @@ public class Appello
             return this;
         }
 
-        public Builder withDomande(List<Domanda> domande) {
+        public Builder withDomande(ArrayList<Domanda> domande) {
             this.domande = domande;
             return this;
         }

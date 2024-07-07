@@ -1,4 +1,7 @@
-package org.example;
+package org.example.GUI;
+
+import org.example.GestioneAppello.Appello;
+import org.example.GestioneAppello.Domanda;
 
 import javax.swing.*;
 import java.awt.*;
@@ -12,10 +15,10 @@ public class EsameGUI extends JDialog
     private int risultato = 0;
 
     private ArrayList<String> risultati = new ArrayList<>();
-    private ArrayList<String> domandeVisualizzate = new ArrayList<>();
+    private ArrayList<Domanda> domandeVisualizzate = new ArrayList<>();
 
     private int currentIteration = 0;
-    private static final int TOTAL_ITERATIONS = 10;
+    private static final int TOTAL_ITERATIONS = 2;//DA MODIFICARE
     private Timer timer;
 
     private Timer countdown;
@@ -66,9 +69,9 @@ public class EsameGUI extends JDialog
         countdown.setRepeats(true);
         countdown.start();
 
-        String domandaDaVisualizzare = "";
+        Domanda domandaDaVisualizzare = null;
         int count = 0;
-        for (String domanda : appello.getMappaDomande().keySet()) {
+        for (Domanda domanda : appello.getDomande()) {
             if (count == currentIteration) {
                 domandaDaVisualizzare = domanda;
                 domandeVisualizzate.add(domanda);
@@ -77,14 +80,14 @@ public class EsameGUI extends JDialog
             count++;
         }
 
-        textArea.setText("Domanda: " + domandaDaVisualizzare + "\nHai 5 minuti per rispondere.");
+        textArea.setText("Domanda: " + domandaDaVisualizzare.getTesto() + "\nHai 5 minuti per rispondere.");
 
-        ArrayList<String> risposte = appello.getMappaDomande().get(domandaDaVisualizzare);
+        ArrayList<String> risposte = domandaDaVisualizzare.getRisposte();
 
         buttonPanel.removeAll();
         for (int j = 0; j < 4; j++) {
             JButton button = new JButton(risposte.get(j));
-            button.addActionListener(new ButtonClickListener(j, risposte.get(j), domandaDaVisualizzare));
+            button.addActionListener(new ButtonClickListener(j, risposte.get(j), domandaDaVisualizzare.getTesto()));
             buttonPanel.add(button);
         }
 
@@ -106,12 +109,12 @@ public class EsameGUI extends JDialog
             currentIteration++;
             caricaNuovaDomanda();
         } else {
-            showResults();
+            //showResults();
             dispose();
         }
     }
 
-
+/*
     private void showResults() {
         StringBuilder resultMessage = new StringBuilder("Risultati dell'appello:\n");
         for (int i = 0; i < risultati.size(); i++) {
@@ -122,6 +125,7 @@ public class EsameGUI extends JDialog
 
         JOptionPane.showMessageDialog(this, resultMessage.toString(), "Risultati", JOptionPane.INFORMATION_MESSAGE);
     }
+ */
 
 
     private class ButtonClickListener implements ActionListener {
@@ -143,17 +147,16 @@ public class EsameGUI extends JDialog
             risultati.add(risposta);
 
             // Controlla se la risposta è corretta e aggiorna il punteggio
-            if (isCorrectAnswer(domanda, risposta)) {
-                risultato += 3; //OGNI RISPOSTA CORRETTA VALE 3 PUNTI
-            }
+            //if (isCorrectAnswer(domanda, risposta)) {
+            //    risultato += 3; //OGNI RISPOSTA CORRETTA VALE 3 PUNTI
+            //}
 
             onTimeUp();
         }
-
+/*
         private boolean isCorrectAnswer(String domanda, String risposta) {
             return appello.getMappaDomande().get(domanda).getFirst().equals(risposta);
         }
+    */
     }
-
-
 }

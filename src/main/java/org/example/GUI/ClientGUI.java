@@ -1,4 +1,8 @@
-package org.example;
+package org.example.GUI;
+
+import org.example.GestioneAppello.Appello;
+import org.example.GestioneAppello.Domanda;
+import org.example.Cliente;
 
 import javax.swing.*;
 import java.awt.*;
@@ -9,7 +13,6 @@ import java.awt.event.MouseEvent;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -39,8 +42,8 @@ public class ClientGUI extends JFrame {
     {   homeFrame.loadAppello(appello);
     }
 
-    public void domandeRisposteAppello(String domande,String risposte,String appello)
-    {   homeFrame.domandeRisposteAppello(domande,risposte,appello);
+    public void domandeRisposteAppello(ArrayList<Domanda> domande, String appello)
+    {   homeFrame.domandeRisposteAppello(domande,appello);
     }
 
     private void initializeGUI() {
@@ -217,15 +220,10 @@ public class ClientGUI extends JFrame {
             return eScaduto;
         }
 
-        private void domandeRisposteAppello(String domande,String risposte,String appello)
-        {   String[] testiDomande = domande.split("-");
-            ArrayList<String> testi = new ArrayList<>(Arrays.asList(testiDomande));
-            String[] blocchiRisposte = risposte.split("#");
-            ArrayList<String> risposteAlleDomande = new ArrayList<>(Arrays.asList(blocchiRisposte));
-
-            for(Appello app: appelli)
+        private void domandeRisposteAppello(ArrayList<Domanda> domande,String appello)
+        {   for(Appello app: appelli)
             {   if(app.getNomeEsame().equals(appello))
-                {   app.setMappaDomande(testi,risposteAlleDomande);
+                {   app.setDomande(domande);
                     app.setPrenotato();
                 }
             }
@@ -272,19 +270,19 @@ public class ClientGUI extends JFrame {
 
         private void showPrenotazioneDialog(String appello) {
             int result = JOptionPane.showConfirmDialog(HomeFrame.this, "Sei sicuro di voler procedere con la prenotazione all'appello?", "Conferma", JOptionPane.YES_NO_OPTION);
-            boolean possoPrenotarmi = cliente.prenotazioneAppello(appello);
-            if (result == JOptionPane.YES_OPTION && possoPrenotarmi) {
-                JOptionPane.showMessageDialog(HomeFrame.this, "Prenotazione per studente con matricola: " + cliente.getMatricola() + " confermata.");
-                prenotazioni.put(appello,true);
+
+            if(result == JOptionPane.YES_OPTION) {
+                boolean possoPrenotarmi = cliente.prenotazioneAppello(appello);
+                if (possoPrenotarmi) {
+                    JOptionPane.showMessageDialog(HomeFrame.this, "Prenotazione per studente con matricola: " + cliente.getMatricola() + " confermata.");
+                    prenotazioni.put(appello, true);
+                } else if (!possoPrenotarmi) {
+                    JOptionPane.showMessageDialog(HomeFrame.this, "Hai già un'appello previsto nello stesso orario");
+                } else {
+                    // Codice da eseguire quando l'utente annulla l'operazione
+                    JOptionPane.showMessageDialog(HomeFrame.this, "Operazione annullata.");
+                }
             }
-            else if(!possoPrenotarmi)
-            {   JOptionPane.showMessageDialog(HomeFrame.this,"Hai già un'appello previsto nello stesso orario");
-            }
-            else {
-                // Codice da eseguire quando l'utente annulla l'operazione
-                JOptionPane.showMessageDialog(HomeFrame.this, "Operazione annullata.");
             }
         }
     }
-
-}

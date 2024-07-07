@@ -1,4 +1,4 @@
-package GestioneAppello;
+package org.example.GestioneAppello;
 
 import java.util.ArrayList;
 
@@ -32,6 +32,7 @@ public class Domanda {
         ArrayList<String> risposte = new ArrayList<>();
         risposte.add(rispostaCorretta);
         risposte.addAll(risposteSbagliate);
+
         return risposte;
     }
 
