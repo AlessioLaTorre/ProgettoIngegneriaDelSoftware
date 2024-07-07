@@ -3,8 +3,7 @@ import io.grpc.ManagedChannel;
 import io.grpc.inprocess.InProcessChannelBuilder;
 import io.grpc.inprocess.InProcessServerBuilder;
 import io.grpc.testing.GrpcCleanupRule;
-import io.grpc.stub.StreamObserver;
-import org.example.Appello;
+import GestioneAppello.Appello;
 import org.example.Cliente;
 import org.example.Server;
 import org.junit.After;
@@ -79,7 +78,11 @@ public class TestClass {
         assertTrue(registrazione);
 
         // Aggiungi un appello al server
-        Appello appello = new Appello(nomeAppello, data, oraInizio, oraFine);
+        Appello appello = Appello.newBuilder().withNomeEsame(nomeAppello)
+                .withData(data)
+                .withOraInizio(oraInizio)
+                .withOraFine(oraFine)
+                .build();
         Server.aggiungiAppello(appello);
 
         // Verifica che l'appello sia stato aggiunto
@@ -90,7 +93,13 @@ public class TestClass {
         assertTrue(prenotazione);
 
         //verifica che un client non possa effettuare due prenotazioni in orari coincidenti
-        Appello app = new Appello("esame", data, "09:01","09:51");
+        Appello app = Appello.newBuilder().withNomeEsame("esame")
+                .withData(data)
+                .withOraInizio(oraInizio)
+                .withOraFine(oraFine)
+                .build();
+
+
         Server.aggiungiAppello(app);
         boolean secondaPrenotazione = client.prenotazioneAppello(app.getNomeEsame());
         assertFalse(secondaPrenotazione);

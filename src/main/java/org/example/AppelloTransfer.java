@@ -1,6 +1,10 @@
 package org.example;
 
+import GestioneAppello.Appello;
+import GestioneAppello.Domanda;
+
 import java.util.ArrayList;
+import java.util.Arrays;
 
 public class AppelloTransfer
 {
@@ -50,10 +54,29 @@ public class AppelloTransfer
     }
 
 
-/*
-    public Appello deserializzaAppello(String appelloSerializzato)
-    {   return ;
+
+    public ArrayList<Domanda> deserializzaPrenotazione(String domande, String risposte)
+    {   ArrayList<Domanda> domandeAppello = new ArrayList<>();
+
+        String[] testiDomande = domande.split("-");
+        ArrayList<String> testi = new ArrayList<>(Arrays.asList(testiDomande));
+        String[] blocchiRisposte = risposte.split("#");
+        ArrayList<String> risposteAlleDomande = new ArrayList<>(Arrays.asList(blocchiRisposte));
+
+        for(int i = 0; i < testi.size(); i++)
+        {
+            String testoDomanda = testi.get(i);
+            String rispostaCorretta = risposteAlleDomande.getFirst();
+
+            ArrayList<String> risposteSbagliate = new ArrayList<>();
+            for(int j = 1; j < risposteAlleDomande.size(); j++)
+            {   risposteSbagliate.add(risposteAlleDomande.get(j));
+            }
+            Domanda d = new Domanda(testoDomanda,rispostaCorretta,risposteSbagliate);
+            domandeAppello.add(d);
+        }
+
+        return domandeAppello;
     }
 
- */
 }
