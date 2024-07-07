@@ -1,8 +1,11 @@
 package org.example;
 
+import org.example.DTO.AppelloTransfer;
+import org.example.GUI.ServerGUI;
+import org.example.GestioneAppello.Appello;
 import io.grpc.ServerBuilder;
 import io.grpc.stub.StreamObserver;
-import org.example.*;
+import org.example.GestioneAppello.Domanda;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -11,6 +14,8 @@ import java.util.concurrent.CopyOnWriteArrayList;
 public class Server {
 
     private static ServerGUI miaGUI;
+
+    private static final AppelloTransfer appelloTransfer = new AppelloTransfer();
 
     private static ArrayList<Utente> registrati = new ArrayList<>();
     private static CopyOnWriteArrayList<Appello> appelli = new CopyOnWriteArrayList<>();
@@ -42,7 +47,7 @@ public class Server {
 
 
 
-    public static class RichiesteHandler extends org.example.ServerGrpc.ServerImplBase
+    public static class RichiesteHandler extends ServerGrpc.ServerImplBase
     {
         @Override
         public void prenotazioneAppello(PrenotazioneRequest request, StreamObserver<PrenotazioneResponse> responseObserver)
@@ -53,16 +58,18 @@ public class Server {
             String cf = request.getCF();
             String appello = request.getAppello();
 
-            Appello app = new Appello();
+            Appello app = null;
             Utente utente = new Utente();
 
             String domande = "";
             String risposte = "";
             for(Appello a:appelli)
             {   if(a.getNomeEsame().equals(appello))
-                {   domande = a.getDomande();
-                    risposte = a.getRisposte();
+                {   domande = appelloTransfer.serializzaDomande(a);
+                    risposte = appelloTransfer.serializzaRisposte(a);
                     app = a;
+
+                    System.out.println(domande + " " + risposte + " " + app);
                 }
             }
 
@@ -87,6 +94,56 @@ public class Server {
             responseObserver.onNext(response);
             responseObserver.onCompleted();
 
+        }
+
+        @Override
+        public void fineAppello(FineAppelloRequest request, StreamObserver<FineAppelloResponse> responseObserver) {
+
+            String matricola = request.getMatricola();
+            String cf = request.getCf();
+            String nomeAppello = request.getNomeAppello();
+
+            Utente utente = new Utente();
+
+            ArrayList<String> risposteDate = appelloTransfer.ottieniRisposteDate(request.getRisposteDate());
+
+            for(Utente a:registrati)
+            {   if(a.getMatricola().equals(matricola) && a.getCF().equals(cf))
+                    utente = a;
+            }
+
+            int punteggio = 0;
+            ArrayList<String> risposteCorrette = new ArrayList<>();
+
+            for(Appello a:appelli)
+            {   if(a.getNomeEsame().equals(nomeAppello))
+                {   ArrayList<Domanda> domandeAppello = a.getDomande();
+                    for(int i = 0; i < domandeAppello.size(); i++)
+                    {   String rispostaCorretta = domandeAppello.get(i).getRispostaCorretta();
+                        if(risposteDate.get(i).equals("Nessuna Risposta"))
+                        {   punteggio -= 1;
+                        } else if (risposteDate.get(i).equals(rispostaCorretta))
+                        {   punteggio += 3;
+                        }
+                        risposteCorrette.add(rispostaCorretta);
+                    }
+                }
+            }
+
+            String rispCorrette = appelloTransfer.serializzaRisposteDateOCorrette(risposteCorrette);
+
+            boolean esamePassato = false;
+            if(punteggio >= 3)
+                esamePassato = true;
+
+            FineAppelloResponse fineAppelloResponse = FineAppelloResponse.newBuilder()
+                    .setPunteggioEffettuato(punteggio)
+                    .setRisposteCorrette(rispCorrette)
+                    .setEsamePassato(esamePassato)
+                    .build();
+
+            responseObserver.onNext(fineAppelloResponse);
+            responseObserver.onCompleted();
         }
 
         @Override

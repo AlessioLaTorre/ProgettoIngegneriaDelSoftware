@@ -1,7 +1,9 @@
 package org.example.GUI;
 
+import org.example.Cliente;
 import org.example.GestioneAppello.Appello;
 import org.example.GestioneAppello.Domanda;
+import org.example.GestioneAppello.Esito;
 
 import javax.swing.*;
 import java.awt.*;
@@ -11,7 +13,8 @@ import java.util.ArrayList;
 
 public class EsameGUI extends JDialog
 {
-    Appello appello;
+    private Cliente cliente;
+    private Appello appello;
     private int risultato = 0;
 
     private ArrayList<String> risultati = new ArrayList<>();
@@ -30,9 +33,10 @@ public class EsameGUI extends JDialog
     private JTextArea textArea;
     private JPanel buttonPanel;
 
-    public EsameGUI(JFrame parent,Appello appello)
+    public EsameGUI(JFrame parent, Appello appello, Cliente cliente)
     {   super(parent,"Appello: "+appello.getNomeEsame(),true);
         this.appello = appello;
+        this.cliente = cliente;
 
         setSize(400, 300);
         setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
@@ -109,23 +113,30 @@ public class EsameGUI extends JDialog
             currentIteration++;
             caricaNuovaDomanda();
         } else {
-            //showResults();
+            Esito esito = cliente.esitoEsame(risultati,appello.getNomeEsame());
+            showResults(esito);
             dispose();
         }
     }
 
-/*
-    private void showResults() {
+
+    private void showResults(Esito esito) {
         StringBuilder resultMessage = new StringBuilder("Risultati dell'appello:\n");
         for (int i = 0; i < risultati.size(); i++) {
             resultMessage.append("La tua risposta ").append(i + 1).append(": ").append(risultati.get(i)).append("\n");
-            resultMessage.append("La risposta corretta era: ").append(appello.getMappaDomande().get(domandeVisualizzate.get(i)).getFirst()).append("\n").append("\n");
+            resultMessage.append("La risposta corretta era: ").append(esito.getRisposteCorrette().get(i)).append("\n").append("\n");
         }
-        resultMessage.append("hai totalizzato ").append(risultato).append(" punti");
+        resultMessage.append("hai totalizzato ").append(esito.getPunteggio()).append(" punti").append("\n");
+
+        resultMessage.append("Esito esame");
+        if(esito.isSuperato())
+            resultMessage.append(" superato");
+        else
+            resultMessage.append(" non superato");
 
         JOptionPane.showMessageDialog(this, resultMessage.toString(), "Risultati", JOptionPane.INFORMATION_MESSAGE);
     }
- */
+
 
 
     private class ButtonClickListener implements ActionListener {
@@ -146,17 +157,7 @@ public class EsameGUI extends JDialog
             // Memorizza la risposta selezionata
             risultati.add(risposta);
 
-            // Controlla se la risposta è corretta e aggiorna il punteggio
-            //if (isCorrectAnswer(domanda, risposta)) {
-            //    risultato += 3; //OGNI RISPOSTA CORRETTA VALE 3 PUNTI
-            //}
-
             onTimeUp();
         }
-/*
-        private boolean isCorrectAnswer(String domanda, String risposta) {
-            return appello.getMappaDomande().get(domanda).getFirst().equals(risposta);
-        }
-    */
     }
 }

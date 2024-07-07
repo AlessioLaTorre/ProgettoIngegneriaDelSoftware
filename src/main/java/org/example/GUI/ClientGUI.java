@@ -42,6 +42,7 @@ public class ClientGUI extends JFrame {
     {   homeFrame.loadAppello(appello);
     }
 
+
     public void domandeRisposteAppello(ArrayList<Domanda> domande, String appello)
     {   homeFrame.domandeRisposteAppello(domande,appello);
     }
@@ -163,7 +164,7 @@ public class ClientGUI extends JFrame {
                             if (appello.isPrenotato() && !appello.isGiaIniziato() && (LocalTime.now().isAfter(appello.getOraInizio())
                                     || LocalTime.now().equals(appello.getOraInizio())) && LocalDate.now().isEqual(appello.getData())) {
                                 appello.setGiaIniziato();
-                                SwingUtilities.invokeLater(() -> new EsameGUI(HomeFrame.this, appello).setVisible(true));
+                                SwingUtilities.invokeLater(() -> new EsameGUI(HomeFrame.this, appello,cliente).setVisible(true));
                             }
                         }
                     }
@@ -187,7 +188,7 @@ public class ClientGUI extends JFrame {
             appelliList.addMouseListener(new MouseAdapter() {
                 @Override
                 public void mouseClicked(MouseEvent e) {
-                    if (e.getClickCount() == 2) {
+                    if (e.getClickCount() >= 2) {
                         int index = appelliList.locationToIndex(e.getPoint());
                         if (index >= 0) {
                             String[] appelloSelezionatoformat = appelliListModel.get(index).split(" ");

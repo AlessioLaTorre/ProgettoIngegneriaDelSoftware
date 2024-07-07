@@ -7,6 +7,20 @@ service Server{
     rpc registrazione(RegistrazioneRequest) returns (RegistrazioneResponse);
     rpc prenotazioneAppello(PrenotazioneRequest) returns (PrenotazioneResponse);
     rpc notificami(NotificaRequest) returns (stream NotificaResponse);
+    rpc fineAppello(FineAppelloRequest) returns (FineAppelloResponse);
+}
+
+message FineAppelloRequest{
+  string risposteDate = 1;
+  string matricola = 2;
+  string cf = 3;
+  string nomeAppello = 4;
+}
+
+message FineAppelloResponse{
+  string risposteCorrette = 1;
+  int32 punteggioEffettuato = 2;
+  bool esamePassato = 3;
 }
 
 message NotificaRequest{}
