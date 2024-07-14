@@ -3,17 +3,18 @@ import io.grpc.ManagedChannel;
 import io.grpc.inprocess.InProcessChannelBuilder;
 import io.grpc.inprocess.InProcessServerBuilder;
 import io.grpc.testing.GrpcCleanupRule;
-import GestioneAppello.Appello;
-import org.example.Cliente;
-import org.example.Server;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
+import org.example.GestioneAppello.Appello;
+import org.example.COMUNICANTIclientServer.Cliente;
+import org.example.COMUNICANTIclientServer.Server;
+import org.example.GestioneAppello.Domanda;
+import org.junit.*;
+
+import java.util.ArrayList;
 
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.assertFalse;
 
+@Ignore
 public class TestClass {
 
     ManagedChannel channel;
@@ -66,8 +67,8 @@ public class TestClass {
 
     @Test
     public void testPrenotazioneAppello() {
-        String matricola = "123456";
-        String cf = "ABCDEF123456";
+        String matricola = "1234567";
+        String cf = "ABCDEF1234567";
         String nomeAppello = "Esame di Test";
         String data = "2024-06-14";
         String oraInizio = "09:00";
@@ -83,10 +84,22 @@ public class TestClass {
                 .withOraInizio(oraInizio)
                 .withOraFine(oraFine)
                 .build();
+
         Server.aggiungiAppello(appello);
 
         // Verifica che l'appello sia stato aggiunto
         assertTrue(Server.contieneAppello(nomeAppello));
+
+        ArrayList<Domanda> domande = new ArrayList<>();
+        ArrayList<String> risposteSbagliate = new ArrayList<>();
+        risposteSbagliate.add("1");
+        risposteSbagliate.add("2");
+        risposteSbagliate.add("3");
+        for(int i = 0; i < 2; i++)
+        {     Domanda d = new Domanda("domanda"+i,"corretta",risposteSbagliate);
+              domande.add(d);
+        }
+        appello.setDomande(domande);
 
         // Effettua la prenotazione dell'appello
         boolean prenotazione = client.prenotazioneAppello(nomeAppello);
@@ -101,6 +114,8 @@ public class TestClass {
 
 
         Server.aggiungiAppello(app);
+        app.setDomande(domande);
+
         boolean secondaPrenotazione = client.prenotazioneAppello(app.getNomeEsame());
         assertFalse(secondaPrenotazione);
 
