@@ -7,6 +7,7 @@ import java.util.ArrayList;
 public class Utente {
     private String matricola,CF;
     private ArrayList<Appello> appelliPrenotati = new ArrayList<>();
+    private ArrayList<Appello> appelliSostenuti = new ArrayList<>();
 
     public Utente() {}
 
@@ -21,8 +22,21 @@ public class Utente {
         return CF;
     }
 
-    public void setAppello(Appello appello) {
+    public void setAppelloPrenotato(Appello appello) {
+        appello.incrementaPrenotati();
         this.appelliPrenotati.add(appello);
+    }
+    public void setAppelloSostenuto(Appello appello) {
+        appello.decrementaPrenotati();
+        this.appelliSostenuti.add(appello);
+    }
+
+    public boolean isPrenotato(Appello appello) {
+        return this.appelliPrenotati.contains(appello);
+    }
+
+    public boolean hasSostenuto(Appello appello) {
+        return this.appelliSostenuti.contains(appello);
     }
 
 

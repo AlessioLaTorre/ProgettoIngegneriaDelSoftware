@@ -1,5 +1,6 @@
-package org.example;
+package org.example.COMUNICANTIclientServer;
 
+import org.example.*;
 import org.example.DTO.AppelloTransfer;
 import org.example.GUI.ClientGUI;
 import org.example.GestioneAppello.Appello;
@@ -10,10 +11,15 @@ import io.grpc.stub.StreamObserver;
 import org.example.GestioneAppello.Esito;
 
 import javax.swing.*;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Cliente implements ClientIF{
+public class Cliente implements ClientIF {
 
     private String matricola;
     private String codiceFiscale;
@@ -63,11 +69,53 @@ public class Cliente implements ClientIF{
         RegistrazioneRequest richiesta = RegistrazioneRequest.newBuilder().setMatricola(matricola).setCF(cf).build();
         RegistrazioneResponse risposta = blockingStub.registrazione(richiesta);
         boolean ret = risposta.getRegistrato();
-        if(ret)
+        if(ret) {
             notificami();
+
+            InizioEsame inizioEsame = new InizioEsame(matricola);
+            inizioEsame.start();
+        }
         return ret;
     }
 
+    class InizioEsame extends Thread {
+
+        private String matricola;
+
+        public InizioEsame(String matricola) {
+            this.matricola = matricola;
+        }
+
+        public void run() {
+            InizioEsameRequest richiesta = InizioEsameRequest.newBuilder()
+                    .setMatricola(matricola)
+                    .build();
+
+            StreamObserver<InizioEsameResponse> responseObserver = new StreamObserver<InizioEsameResponse>() {
+
+                @Override
+                public void onNext(InizioEsameResponse inizioEsameResponse) {
+                    String nomeEsame = inizioEsameResponse.getNomeEsame();
+
+                    System.out.println("Sto inizioando l'esame e sono"+matricola);
+                    miaGUI.inizioEsame(nomeEsame);
+                }
+
+                @Override
+                public void onError(Throwable throwable) {
+                    throwable.printStackTrace();
+                }
+
+                @Override
+                public void onCompleted() {
+                }
+
+            };
+            asyncStub.inizioEsami(richiesta, responseObserver);
+
+        }
+
+    }
 
     public void notificami()
     {   NotificaRequest richiesta = NotificaRequest.newBuilder().build();
@@ -80,13 +128,36 @@ public class Cliente implements ClientIF{
                 String data = notificaResponse.getData();
                 String oraInizio = notificaResponse.getOraInizio();
                 String oraFine = notificaResponse.getOraFine();
+                String zonaFusoOrarioServer = notificaResponse.getZonaFusoOrario();
+                ZoneId zonaOrarioAttale = ZoneId.systemDefault();
+
+                // Convertire la stringa dell'orario in LocalTime
+                DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm");
+                LocalTime start = LocalTime.parse(oraInizio, timeFormatter);
+                LocalTime end = LocalTime.parse(oraFine, timeFormatter);
+
+                // Convertire la stringa del fuso orario in ZoneId
+                ZoneId serverZoneId = ZoneId.of(zonaFusoOrarioServer);
+
+                // Creare un ZonedDateTime usando la data corrente, l'orario e il fuso orario del server
+                ZonedDateTime serverZonedDateTimeStart = ZonedDateTime.of(LocalDate.now(), start, serverZoneId);
+                ZonedDateTime serverZonedDateTimeEnd = ZonedDateTime.of(LocalDate.now(), end, serverZoneId);
+
+                ZonedDateTime clientZonedExamTimeStart = serverZonedDateTimeStart.withZoneSameInstant(zonaOrarioAttale);
+                ZonedDateTime clientZonedExamTimeEnd = serverZonedDateTimeEnd.withZoneSameInstant(zonaOrarioAttale);
+
+                // Estrarre LocalTime da ZonedDateTime
+                LocalTime oraInizioLocale = clientZonedExamTimeStart.toLocalTime();
+                LocalTime oraFineLocale = clientZonedExamTimeEnd.toLocalTime();
+
+                LocalDate dataAppello = clientZonedExamTimeStart.toLocalDate();
 
 
                 Appello.Builder builder = Appello.newBuilder();
                 Appello daAggiungere = builder.withNomeEsame(nomeEsame)
-                                              .withData(data)
-                                              .withOraInizio(oraInizio)
-                                              .withOraFine(oraFine)
+                                              .withData(dataAppello)
+                                              .withOraInizio(oraInizioLocale)
+                                              .withOraFine(oraFineLocale)
                                               .build();
 
                 miaGUI.loadAppello(daAggiungere);

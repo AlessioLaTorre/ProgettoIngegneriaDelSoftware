@@ -8,6 +8,15 @@ service Server{
     rpc prenotazioneAppello(PrenotazioneRequest) returns (PrenotazioneResponse);
     rpc notificami(NotificaRequest) returns (stream NotificaResponse);
     rpc fineAppello(FineAppelloRequest) returns (FineAppelloResponse);
+    rpc inizioEsami(InizioEsameRequest) returns (stream InizioEsameResponse);
+}
+
+message InizioEsameRequest{
+  string matricola = 1;
+}
+
+message InizioEsameResponse{
+  string nomeEsame = 1;
 }
 
 message FineAppelloRequest{
@@ -30,6 +39,7 @@ message NotificaResponse{
   string data = 2;
   string oraInizio = 3;
   string oraFine = 4;
+  string zonaFusoOrario = 5;
 }
 
 message RegistrazioneRequest{

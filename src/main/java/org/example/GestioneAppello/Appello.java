@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class Appello
 {
@@ -14,8 +15,21 @@ public class Appello
     private static final int durata = 50;
     private boolean giaIniziato = false;
     private boolean prenotato = false;
+    private AtomicInteger prenotati = new AtomicInteger(0);
 
     private List<Domanda> domande;
+
+    public void incrementaPrenotati()
+    {
+        prenotati.incrementAndGet();
+    }
+
+    public void decrementaPrenotati()
+    {
+        prenotati.decrementAndGet();
+        if(prenotati.intValue() == 0)
+            setGiaIniziato();
+    }
 
     public void setPrenotato() {
         this.prenotato = true;
@@ -99,7 +113,16 @@ public class Appello
          * @return
          */
         public Builder withData(String data) {
+            if(this.data != null)
+                throw new IllegalStateException("La data è stata già settata");
             this.data = LocalDate.parse(data);
+            return this;
+        }
+
+        public Builder withData(LocalDate data) {
+            if(this.data != null)
+                throw new IllegalStateException("La data è stata già settata");
+            this.data = data;
             return this;
         }
 
@@ -110,7 +133,16 @@ public class Appello
          * @return
          */
         public Builder withOraInizio(String oraInizio) {
+            if(this.oraInizio != null)
+                throw new IllegalStateException("L'orario di inizio è già stato settato");
             this.oraInizio = LocalTime.parse(oraInizio);
+            return this;
+        }
+
+        public Builder withOraInizio(LocalTime oraInizio) {
+            if(this.oraInizio != null)
+                throw new IllegalStateException("L'orario di inizio è già stato settato");
+            this.oraInizio = oraInizio;
             return this;
         }
 
@@ -121,7 +153,16 @@ public class Appello
          * @return
          */
         public Builder withOraFine(String oraFine) {
+            if(this.oraFine != null)
+                throw new IllegalStateException("L'orario di fine è già stato settato");
             this.oraFine = LocalTime.parse(oraFine);
+            return this;
+        }
+
+        public Builder withOraFine(LocalTime oraFine) {
+            if(this.oraFine != null)
+                throw new IllegalStateException("L'orario di fine è già stato settato");
+            this.oraFine = oraFine;
             return this;
         }
 

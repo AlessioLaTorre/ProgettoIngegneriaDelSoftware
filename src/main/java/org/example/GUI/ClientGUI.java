@@ -2,7 +2,7 @@ package org.example.GUI;
 
 import org.example.GestioneAppello.Appello;
 import org.example.GestioneAppello.Domanda;
-import org.example.Cliente;
+import org.example.COMUNICANTIclientServer.Cliente;
 
 import javax.swing.*;
 import java.awt.*;
@@ -10,8 +10,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.time.LocalDate;
-import java.time.LocalTime;
+import java.time.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -35,6 +34,11 @@ public class ClientGUI extends JFrame {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
         initializeGUI();
+    }
+
+    public void inizioEsame(String nomeEsame)
+    {
+        homeFrame.inizioEsame(nomeEsame);
     }
 
     //METODO CHE SERVE PER RAGGIUNGERE LA GUI DAL CLIENT
@@ -148,31 +152,6 @@ public class ClientGUI extends JFrame {
             setLocationRelativeTo(null);
             initializeGUI();
 
-            ControllaInizioEsami controllaInizioEsami = new ControllaInizioEsami();
-            controllaInizioEsami.start();
-        }
-
-        class ControllaInizioEsami extends Thread {
-
-            @Override
-            public void run()
-            {   try {
-                while (true) {
-                    sleep(3000);
-                    if (!appelli.isEmpty()) {
-                        for (Appello appello : appelli) {
-                            if (appello.isPrenotato() && !appello.isGiaIniziato() && (LocalTime.now().isAfter(appello.getOraInizio())
-                                    || LocalTime.now().equals(appello.getOraInizio())) && LocalDate.now().isEqual(appello.getData())) {
-                                appello.setGiaIniziato();
-                                SwingUtilities.invokeLater(() -> new EsameGUI(HomeFrame.this, appello,cliente).setVisible(true));
-                            }
-                        }
-                    }
-                }
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
-            }
-            }
         }
 
 
@@ -229,6 +208,12 @@ public class ClientGUI extends JFrame {
                 }
             }
 
+        }
+
+        public void inizioEsame(String nomeEsame) {
+            for(Appello appello: appelli)
+                if(appello.getNomeEsame().equals(nomeEsame))
+                    SwingUtilities.invokeLater(() -> new EsameGUI(HomeFrame.this, appello,cliente).setVisible(true));
         }
 
         private void loadAppello(Appello a) {

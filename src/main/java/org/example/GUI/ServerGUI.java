@@ -2,7 +2,7 @@ package org.example.GUI;
 
 import org.example.GestioneAppello.Appello;
 import org.example.GestioneAppello.Domanda;
-import org.example.Server;
+import org.example.COMUNICANTIclientServer.Server;
 
 import javax.swing.*;
 import java.awt.*;

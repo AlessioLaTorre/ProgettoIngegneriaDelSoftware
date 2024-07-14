@@ -1,6 +1,6 @@
 package org.example.GUI;
 
-import org.example.Cliente;
+import org.example.COMUNICANTIclientServer.Cliente;
 import org.example.GestioneAppello.Appello;
 import org.example.GestioneAppello.Domanda;
 import org.example.GestioneAppello.Esito;

@@ -70,13 +70,10 @@ public class AppelloTransfer
             String testoDomanda = testi.get(i);
             String rispostaCorretta = tutteRisposte[0];
 
-            System.out.println(testoDomanda);
-            System.out.println(rispostaCorretta);
 
             ArrayList<String> risposteSbagliate = new ArrayList<>();
             for(int j = 1; j < tutteRisposte.length; j++)
             {   risposteSbagliate.add(tutteRisposte[j]);
-                System.out.println(tutteRisposte[i]);
             }
             Domanda d = new Domanda(testoDomanda,rispostaCorretta,risposteSbagliate);
             domandeAppello.add(d);

@@ -1,13 +1,18 @@
-package org.example;
+package org.example.COMUNICANTIclientServer;
 
+import org.example.*;
 import org.example.DTO.AppelloTransfer;
 import org.example.GUI.ServerGUI;
 import org.example.GestioneAppello.Appello;
 import io.grpc.ServerBuilder;
 import io.grpc.stub.StreamObserver;
 import org.example.GestioneAppello.Domanda;
+import org.example.GestioneAppello.Utente;
 
 import java.io.IOException;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -47,8 +52,56 @@ public class Server {
 
 
 
+
     public static class RichiesteHandler extends ServerGrpc.ServerImplBase
     {
+        @Override
+        public void inizioEsami(InizioEsameRequest request, StreamObserver<InizioEsameResponse> responseObserver) {
+            GestoreInizioEsami gestoreInizioEsami = new GestoreInizioEsami(responseObserver,request.getMatricola());
+            gestoreInizioEsami.start();
+            System.out.println("mi sono rotto i coglioni porcaccia la miseria ladra");
+        }
+
+        class GestoreInizioEsami extends Thread
+        {
+            private String matricola;
+            private StreamObserver<InizioEsameResponse> responseObserver;
+            public GestoreInizioEsami(StreamObserver<InizioEsameResponse> responseObserver,String matricola)
+            {
+                this.responseObserver = responseObserver;
+                this.matricola = matricola;
+            }
+
+            @Override
+            public void run() {
+
+                while (true) {
+                    try {
+                        sleep(1000);
+                        for (Appello appello : appelli) {
+                            System.out.println(appello.isGiaIniziato());
+                            if (!appello.isGiaIniziato()) {
+                                if ((LocalTime.now().equals(appello.getOraInizio()) || LocalTime.now().isAfter(appello.getOraInizio()))
+                                        && LocalDate.now().isEqual(appello.getData())) {
+                                    for (Utente utente : registrati) {
+                                        if (utente.getMatricola().equals(matricola) && utente.isPrenotato(appello) && !utente.hasSostenuto(appello)) {
+                                            utente.setAppelloSostenuto(appello);
+                                            InizioEsameResponse response = InizioEsameResponse.newBuilder()
+                                                    .setNomeEsame(appello.getNomeEsame())
+                                                    .build();
+                                            responseObserver.onNext(response);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    } catch (InterruptedException e) {
+                        throw new RuntimeException(e);
+                    }
+                }
+            }}
+
+
         @Override
         public void prenotazioneAppello(PrenotazioneRequest request, StreamObserver<PrenotazioneResponse> responseObserver)
         {
@@ -68,8 +121,6 @@ public class Server {
                 {   domande = appelloTransfer.serializzaDomande(a);
                     risposte = appelloTransfer.serializzaRisposte(a);
                     app = a;
-
-                    System.out.println(domande + " " + risposte + " " + app);
                 }
             }
 
@@ -81,9 +132,10 @@ public class Server {
 
             if(utente.isOrarioAccettabile(app))
             {   prenotato = true;
-                utente.setAppello(app);
+                utente.setAppelloPrenotato(app);
                 inserisciPrenotato(appello,matricola);
             }
+
 
             PrenotazioneResponse response = PrenotazioneResponse.newBuilder()
                     .setDomandeAppello(domande)
@@ -202,6 +254,7 @@ public class Server {
                                         .setData(appello.getData().toString())
                                         .setOraInizio(appello.getOraInizio().toString())
                                         .setOraFine(appello.getOraFine().toString())
+                                        .setZonaFusoOrario(ZoneId.systemDefault().toString())
                                         .build();
                                 responseObserver.onNext(notifica);
                             }
